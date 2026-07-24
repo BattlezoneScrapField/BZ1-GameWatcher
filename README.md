@@ -90,7 +90,10 @@ TLS certificate every 12 hours. Certificates live in `certbot/conf/`.
 Pushing to `main` builds and tests both projects, then publishes images to GHCR tagged `latest` and
 with the commit SHA:
 
-- `ghcr.io/jj173/battlezone-api-ghcr`
-- `ghcr.io/jj173/battlezone-web-ghcr`
+- `ghcr.io/battlezonescrapfield/battlezone-api-ghcr`
+- `ghcr.io/battlezonescrapfield/battlezone-web-ghcr`
+
+The owner segment is derived from the repository owner at build time, so a fork publishes to its own
+namespace rather than failing against someone else's.
 
 Pull requests build and test without publishing.
