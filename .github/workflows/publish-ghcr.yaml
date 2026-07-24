@@ -49,7 +49,9 @@ jobs:
     name: Publish images
     # Only publish from main, and only once the code is known to build and pass its tests.
     # Previously every push on every branch overwrote the production :latest tags.
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    # workflow_dispatch is allowed so a publish can be triggered from the Actions tab without
+    # an empty commit — needed to republish after Actions has been disabled, for instance.
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     needs: [ build_api, build_web ]
     runs-on: ubuntu-latest
     permissions:
