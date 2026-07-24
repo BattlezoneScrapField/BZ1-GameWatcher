@@ -5,7 +5,6 @@ import { SiteNavComponent } from '../../components/site-nav/site-nav.component';
 /** Placeholder for the planned unit database; not yet linked from the navigation. */
 @Component({
     selector: 'app-unit-database',
-    standalone: true,
     imports: [CommonModule, SiteNavComponent],
     templateUrl: './unit-database.component.html',
     styleUrl: './unit-database.component.scss'
