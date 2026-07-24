@@ -31,12 +31,12 @@ builder.Services.AddCors(options =>
 });
 
 // nginx terminates TLS and forwards the client address; without this the app sees the proxy's
-// address and scheme. KnownProxies/KnownNetworks are cleared because the proxy's container IP is
+// address and scheme. KnownProxies/KnownIPNetworks are cleared because the proxy's container IP is
 // not fixed — safe here only because the API is not published outside the compose network.
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-    options.KnownNetworks.Clear();
+    options.KnownIPNetworks.Clear();
     options.KnownProxies.Clear();
 });
 
