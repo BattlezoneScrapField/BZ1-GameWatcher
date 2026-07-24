@@ -1,0 +1,99 @@
+using System.Text.Json.Serialization;
+
+namespace BZAPI.Models.Responses
+{
+    /// <summary>
+    /// The public shape of a lobby.
+    /// </summary>
+    /// <remarks>
+    /// Deliberately separate from <see cref="BZ98Lobby"/>, which mirrors the upstream websocket
+    /// payload and therefore carries data that must never be published — most importantly each
+    /// player's IP and LAN addresses. Mapping through an explicit response type means a new field
+    /// on the wire model cannot silently become public.
+    /// </remarks>
+    public sealed class LobbyResponse
+    {
+        public int Id { get; init; }
+        public string? ClientVersion { get; init; }
+        public DateTimeOffset CreatedTime { get; init; }
+        public bool IsChat { get; init; }
+        public bool IsLocked { get; init; }
+        public bool IsPrivate { get; init; }
+        public int MemberLimit { get; init; }
+        public string? Owner { get; init; }
+        public int UserCount { get; init; }
+        public string? DirectJoinUrl { get; init; }
+        public UserResponse? Host { get; init; }
+        public LobbyMetaDataResponse? MetaData { get; init; }
+        public LobbyStatsResponse? Stats { get; init; }
+        public Dictionary<string, UserResponse> Users { get; init; } = [];
+    }
+
+    public sealed class LobbyMetaDataResponse
+    {
+        public string? GameVersion { get; init; }
+        public string? GameSettings { get; init; }
+        public string? GameType { get; init; }
+        public string? Launched { get; init; }
+        public string? Name { get; init; }
+        public string? NextMid { get; init; }
+        public string? UserCount { get; init; }
+        public string? UserPack { get; init; }
+    }
+
+    public sealed class LobbyStatsResponse
+    {
+        public string? MapFile { get; init; }
+
+        // Without this the default camelCase policy emits "crC32", which no client expects.
+        [JsonPropertyName("crc32")]
+        public string? CRC32 { get; init; }
+        public string? Mod { get; init; }
+        public LobbyStatsAttributesResponse? Attributes { get; init; }
+    }
+
+    public sealed class LobbyStatsAttributesResponse
+    {
+        public string? Lives { get; init; }
+        public bool Satellite { get; init; }
+        public bool Barracks { get; init; }
+        public bool Sniper { get; init; }
+        public bool Splinter { get; init; }
+    }
+
+    /// <summary>
+    /// The public shape of a player. Note the absence of IPAddress, WANAddress and LanAddresses.
+    /// </summary>
+    public sealed class UserResponse
+    {
+        public string? AuthType { get; init; }
+        public string? ClientVersion { get; init; }
+        public string? Id { get; init; }
+        public bool IsAdmin { get; init; }
+        public bool IsAuth { get; init; }
+        public bool IsBB { get; init; }
+        public bool IsDangerous { get; init; }
+        public bool IsInLounge { get; init; }
+        public bool IsGOG { get; init; }
+        public bool IsTest { get; init; }
+        public bool IsSteam { get; init; }
+        public int Lobby { get; init; }
+        public string? Name { get; init; }
+        public UserMetaDataResponse? MetaData { get; init; }
+        public LobbyStatsResponse? Stats { get; init; }
+        public string? SteamImgUri { get; init; }
+        public string? SteamCleanId { get; init; }
+    }
+
+    public sealed class UserMetaDataResponse
+    {
+        public string? ClientsConnected { get; init; }
+        public string? FriendId { get; init; }
+        public string? KnownPlayers { get; init; }
+        public string? Launched { get; init; }
+        public string? MiniId { get; init; }
+        public string? Ready { get; init; }
+        public string? Team { get; init; }
+        public string? Vehicle { get; init; }
+    }
+}

@@ -65,6 +65,6 @@ namespace BZAPI.Websocket
         public string? Id { get; set; }
 
         [JsonProperty("apiVer")]
-        public string? apiVer { get; set; }
+        public string? ApiVer { get; set; }
     }
 }

@@ -1,9 +1,13 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
-
 namespace BZAPI.Models
 {
+    /// <summary>
+    /// Mirrors the lobby payload published by the Battlezone 98 Redux lobby server.
+    /// </summary>
+    /// <remarks>
+    /// These are internal wire models and must not be returned from controllers — they carry
+    /// player IP and LAN addresses. Project them onto the types in
+    /// <see cref="Responses"/> before serving them.
+    /// </remarks>
     public class BZ98Lobby
     {
         public BZ98Lobby()
@@ -13,7 +17,6 @@ namespace BZAPI.Models
             Users = [];
         }
 
-        [Key]
         public int Id { get; set; }
         public string? ClientVersion { get; set; }
         public DateTimeOffset CreatedTime { get; set; }
@@ -25,17 +28,13 @@ namespace BZAPI.Models
         public int UserCount { get; set; }
         public string? DirectJoinUrl { get; set; }
 
-        [NotMapped]
-        public BZ98User Host { get; set; }
-        [NotMapped]
+        public BZ98User? Host { get; set; }
         public BZ98MetaData? MetaData { get; set; }
-        [NotMapped]
         public BZ98LobbyData? Stats { get; set; }
-        [NotMapped]
         public Dictionary<string, BZ98User>? Users { get; set; }
     }
 
-    public partial class BZ98MetaData
+    public class BZ98MetaData
     {
         public int LobbyId { get; set; }
         public string? GameVersion { get; set; }
@@ -48,15 +47,13 @@ namespace BZAPI.Models
         public string? UserPack { get; set; }
     }
 
-    public partial class BZ98LobbyData
+    public class BZ98LobbyData
     {
         public BZ98LobbyData()
         {
             Attributes = new();
         }
 
-        [Key]
-        [JsonIgnore]
         public int LobbyId { get; set; }
         public string? MapFile { get; set; }
         public string? CRC32 { get; set; }
@@ -64,7 +61,7 @@ namespace BZAPI.Models
         public BZ98LobbyDataAttributes? Attributes { get; set; }
     }
 
-    public partial class BZ98LobbyDataAttributes
+    public class BZ98LobbyDataAttributes
     {
         public string? Lives { get; set; }
         public bool Satellite { get; set; }
@@ -73,7 +70,7 @@ namespace BZAPI.Models
         public bool Splinter { get; set; }
     }
 
-    public partial class BZ98User
+    public class BZ98User
     {
         public BZ98User()
         {
@@ -84,7 +81,10 @@ namespace BZAPI.Models
         public string? AuthType { get; set; }
         public string? ClientVersion { get; set; }
         public string? Id { get; set; }
+
+        /// <summary>Personally identifying; never serialise to clients.</summary>
         public string? IPAddress { get; set; }
+
         public bool IsAdmin { get; set; }
         public bool IsAuth { get; set; }
         public bool IsBB { get; set; }
@@ -93,17 +93,23 @@ namespace BZAPI.Models
         public bool IsGOG { get; set; }
         public bool IsTest { get; set; }
         public bool IsSteam { get; set; }
+
+        /// <summary>Personally identifying; never serialise to clients.</summary>
         public List<string>? LanAddresses { get; set; }
+
         public int Lobby { get; set; }
         public string? Name { get; set; }
+
+        /// <summary>Personally identifying; never serialise to clients.</summary>
         public string? WANAddress { get; set; }
+
         public BZ98UserMetaData? MetaData { get; set; }
         public BZ98LobbyData? Stats { get; set; }
         public string? SteamImgUri { get; set; }
         public string? SteamCleanId { get; set; }
     }
 
-    public partial class BZ98UserMetaData
+    public class BZ98UserMetaData
     {
         public string? ClientsConnected { get; set; }
         public string? FriendId { get; set; }
