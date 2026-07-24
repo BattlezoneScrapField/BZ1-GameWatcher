@@ -1,0 +1,117 @@
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
+
+namespace BZAPI.Models
+{
+    public class BZ98Lobby
+    {
+        public BZ98Lobby()
+        {
+            MetaData = new();
+            Stats = new();
+            Users = [];
+        }
+
+        [Key]
+        public int Id { get; set; }
+        public string? ClientVersion { get; set; }
+        public DateTimeOffset CreatedTime { get; set; }
+        public bool IsChat { get; set; }
+        public bool IsLocked { get; set; }
+        public bool IsPrivate { get; set; }
+        public int MemberLimit { get; set; }
+        public string? Owner { get; set; }
+        public int UserCount { get; set; }
+        public string? DirectJoinUrl { get; set; }
+
+        [NotMapped]
+        public BZ98User Host { get; set; }
+        [NotMapped]
+        public BZ98MetaData? MetaData { get; set; }
+        [NotMapped]
+        public BZ98LobbyData? Stats { get; set; }
+        [NotMapped]
+        public Dictionary<string, BZ98User>? Users { get; set; }
+    }
+
+    public partial class BZ98MetaData
+    {
+        public int LobbyId { get; set; }
+        public string? GameVersion { get; set; }
+        public string? GameSettings { get; set; }
+        public string? GameType { get; set; }
+        public string? Launched { get; set; }
+        public string? Name { get; set; }
+        public string? NextMid { get; set; }
+        public string? UserCount { get; set; }
+        public string? UserPack { get; set; }
+    }
+
+    public partial class BZ98LobbyData
+    {
+        public BZ98LobbyData()
+        {
+            Attributes = new();
+        }
+
+        [Key]
+        [JsonIgnore]
+        public int LobbyId { get; set; }
+        public string? MapFile { get; set; }
+        public string? CRC32 { get; set; }
+        public string? Mod { get; set; }
+        public BZ98LobbyDataAttributes? Attributes { get; set; }
+    }
+
+    public partial class BZ98LobbyDataAttributes
+    {
+        public string? Lives { get; set; }
+        public bool Satellite { get; set; }
+        public bool Barracks { get; set; }
+        public bool Sniper { get; set; }
+        public bool Splinter { get; set; }
+    }
+
+    public partial class BZ98User
+    {
+        public BZ98User()
+        {
+            MetaData = new();
+            Stats = new();
+        }
+
+        public string? AuthType { get; set; }
+        public string? ClientVersion { get; set; }
+        public string? Id { get; set; }
+        public string? IPAddress { get; set; }
+        public bool IsAdmin { get; set; }
+        public bool IsAuth { get; set; }
+        public bool IsBB { get; set; }
+        public bool IsDangerous { get; set; }
+        public bool IsInLounge { get; set; }
+        public bool IsGOG { get; set; }
+        public bool IsTest { get; set; }
+        public bool IsSteam { get; set; }
+        public List<string>? LanAddresses { get; set; }
+        public int Lobby { get; set; }
+        public string? Name { get; set; }
+        public string? WANAddress { get; set; }
+        public BZ98UserMetaData? MetaData { get; set; }
+        public BZ98LobbyData? Stats { get; set; }
+        public string? SteamImgUri { get; set; }
+        public string? SteamCleanId { get; set; }
+    }
+
+    public partial class BZ98UserMetaData
+    {
+        public string? ClientsConnected { get; set; }
+        public string? FriendId { get; set; }
+        public string? KnownPlayers { get; set; }
+        public string? Launched { get; set; }
+        public string? MiniId { get; set; }
+        public string? Ready { get; set; }
+        public string? Team { get; set; }
+        public string? Vehicle { get; set; }
+    }
+}

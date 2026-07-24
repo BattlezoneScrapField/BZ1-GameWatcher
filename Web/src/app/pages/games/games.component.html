@@ -1,0 +1,161 @@
+<nav class="navbar navbar-expand-lg bg-dark">
+    <div class="container-fluid">
+        <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between w-100">
+            <a class="d-flex col-md-4 align-items-center mb-2 mb-lg-0 link-body-emphasis text-decoration-none">
+                <img src="favicon.ico" width="30" height="30"/>
+                <div class="ms-2">
+                    Battlezone 98 Redux Game List
+                </div>
+            </a>
+
+            <ul class="nav nav-pills col-12 col-lg-auto mb-2 justify-content-center mb-md-0">
+                <li class="nav-item me-2">
+                    <a routerLink="games" class="nav-link bg-secondary active" href="/games">Games</a>
+                </li>
+                <!-- <li class="nav-item">
+                    <a routerLink="unit-database" class="nav-link px-2 text-secondary" href="/unit-database">Unit Database</a>
+                </li> -->
+            </ul>
+
+            <div class="col-md-3 text-end">
+                <a class="me-3 fs-4 text-white" href="https://www.youtube.com/@battlezonecommunity" target="_blank"><fa-icon [icon]="faYouTube"></fa-icon></a>
+                <a class="me-2 fs-4 text-white" href="https://discord.gg/battlezonestrategy"><fa-icon [icon]="faDiscord"></fa-icon></a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-xl-9 col-12" *ngIf="BZ98Lobbies">
+            <section class="wrapper">
+                <div class="row">
+                    <div class="col mb-2">
+                        <h1 class="display-4 font-weight-bolder">Lobbies [{{BZ98Lobbies.length}}]</h1>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-6 pb-3" *ngFor="let lobby of BZ98Lobbies; index as i;">
+                        <div class="card card-custom bg-dark border-dark" style="height:550px;">
+                            <div class="card-custom-img" style="background-image: url('/poster.jpg')">
+                                <div class="navbar navbar-expand-lg">
+                                    <div class="container-fluid">
+                                        <div class="navbar-brand bg-dark-subtle p-2 rounded opacity-75">
+                                            <label class="fw-semibold">Game {{ i + 1 }} | {{ lobby.stats.mapFile }} - {{ lobby.metaData.gameType == '0' ? 'MPI' : 'Strategy' }}</label>
+                                        </div>
+    
+                                        <div class="d-flex justify-content-end flex-wrap flex-md-nowrap align-items-center">
+                                            <div class="custom-pill" style="background-color: purple;"><fa-icon style="font-size: 18px;" class="me-2" [icon]="faUser"></fa-icon> {{ lobby.userCount }} / {{ lobby.memberLimit }}</div>
+                                            <div class="ms-2 me-2">
+                                                <fa-icon *ngIf="lobby.isLocked || lobby.isPrivate" class="icon bg-danger" [icon]="faLock"></fa-icon>
+                                                <fa-icon *ngIf="!lobby.isLocked && !lobby.isPrivate" class="icon bg-success" [icon]="faLockOpen"></fa-icon>
+                                            </div>
+                                            <ng-container *ngIf="!lobby.isLocked && !lobby.isPrivate">
+                                                <div class="btn-group">
+                                                    <!-- <button type="button" class="icon btn custom-pill" style="background-color: purple;"><img src="gog-icon.png" width="38px" /></button> -->
+                                                    <button title="Join Game via Steam" type="button" class="icon btn custom-pill me-1" style="background-color: purple;"><img src="steam-icon.png" width="28px" /></button>
+                                                    <button #discordLink (click)="shareToDiscord(discordLink, lobby);" title="Share Link to Discord" type="button" class="icon btn custom-pill" style="background-color: purple;"><textarea class="visually-hidden"></textarea><fa-icon [icon]="faLink"></fa-icon></button>
+                                                </div>
+                                            </ng-container>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-custom-avatar" *ngIf="lobby.host">
+                                <img class="img-fluid border border-3 border-warning" [src]="lobby.host.steamImgUri" alt="Avatar" />
+                                <div class="host-marker text-dark">Host</div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <!-- Left Column (Odd Players) -->
+                                    <div class="col-md-6 col-12">
+                                        <div class="card" *ngIf="lobby.oddTeamUsers.length > 0">
+                                            <div class="card-header">
+                                                Odds
+                                            </div>
+
+                                            <div class="list list-row">
+                                                <ng-container *ngFor="let user of lobby.oddTeamUsers; index as j;">
+                                                    <div class="d-flex justify-content-start align-items-start">
+                                                        <img [src]="user.steamImgUri" width="40" height="40">
+                                                        <h6 class="ms-2 mt-2">{{user.name}}</h6>
+                                                        <a title="Steam Profile" *ngIf="user.isSteam" class="m-1 text-decoration-none btn btn-sm btn-primary text-bg-primary border border-primary" style="--bs-bg-opacity:.3;--bs-border-opacity:.3;" href="https://steamcommunity.com/profiles/{{user.steamCleanId}}/" target="_blank">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-steam" viewBox="0 0 16 16" style="margin-bottom:3px;">
+                                                                <path d="M.329 10.333A8.01 8.01 0 0 0 7.99 16C12.414 16 16 12.418 16 8s-3.586-8-8.009-8A8.006 8.006 0 0 0 0 7.468l.003.006 4.304 1.769A2.2 2.2 0 0 1 5.62 8.88l1.96-2.844-.001-.04a3.046 3.046 0 0 1 3.042-3.043 3.046 3.046 0 0 1 3.042 3.043 3.047 3.047 0 0 1-3.111 3.044l-2.804 2a2.223 2.223 0 0 1-3.075 2.11 2.22 2.22 0 0 1-1.312-1.568L.33 10.333Z"/>
+                                                                <path d="M4.868 12.683a1.715 1.715 0 0 0 1.318-3.165 1.7 1.7 0 0 0-1.263-.02l1.023.424a1.261 1.261 0 1 1-.97 2.33l-.99-.41a1.7 1.7 0 0 0 .882.84Zm3.726-6.687a2.03 2.03 0 0 0 2.027 2.029 2.03 2.03 0 0 0 2.027-2.029 2.03 2.03 0 0 0-2.027-2.027 2.03 2.03 0 0 0-2.027 2.027m2.03-1.527a1.524 1.524 0 1 1-.002 3.048 1.524 1.524 0 0 1 .002-3.048"/>
+                                                            </svg> 
+                                                        </a>
+                                                    </div>
+                                                </ng-container>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Right Column (Even Players) -->
+                                    <div class="col-md-6 col-12">
+                                        <div class="card" *ngIf="lobby.evenTeamUsers.length > 0">
+                                            <div class="card-header">
+                                                Evens
+                                            </div>
+
+                                            <div class="list-group">
+                                                <ng-container *ngFor="let user of lobby.evenTeamUsers; index as j;">
+                                                    <div class="d-flex justify-content-start align-items-start">
+                                                        <img [src]="user.steamImgUri" width="40" height="40">
+                                                        <h6 class="ms-2 mt-2">{{user.name}}</h6>
+                                                        <a title="Steam Profile" *ngIf="user.isSteam" class="m-1 text-decoration-none btn btn-sm btn-primary text-bg-primary border border-primary" style="--bs-bg-opacity:.3;--bs-border-opacity:.3;" href="https://steamcommunity.com/profiles/{{user.steamCleanId}}/" target="_blank">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-steam" viewBox="0 0 16 16" style="margin-bottom:3px;">
+                                                                <path d="M.329 10.333A8.01 8.01 0 0 0 7.99 16C12.414 16 16 12.418 16 8s-3.586-8-8.009-8A8.006 8.006 0 0 0 0 7.468l.003.006 4.304 1.769A2.2 2.2 0 0 1 5.62 8.88l1.96-2.844-.001-.04a3.046 3.046 0 0 1 3.042-3.043 3.046 3.046 0 0 1 3.042 3.043 3.047 3.047 0 0 1-3.111 3.044l-2.804 2a2.223 2.223 0 0 1-3.075 2.11 2.22 2.22 0 0 1-1.312-1.568L.33 10.333Z"/>
+                                                                <path d="M4.868 12.683a1.715 1.715 0 0 0 1.318-3.165 1.7 1.7 0 0 0-1.263-.02l1.023.424a1.261 1.261 0 1 1-.97 2.33l-.99-.41a1.7 1.7 0 0 0 .882.84Zm3.726-6.687a2.03 2.03 0 0 0 2.027 2.029 2.03 2.03 0 0 0 2.027-2.029 2.03 2.03 0 0 0-2.027-2.027 2.03 2.03 0 0 0-2.027 2.027m2.03-1.527a1.524 1.524 0 1 1-.002 3.048 1.524 1.524 0 0 1 .002-3.048"/>
+                                                            </svg> 
+                                                        </a>
+                                                    </div>
+                                                </ng-container>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer text-body-secondary text-center">Game Version: {{lobby.metaData.gameVersion}}</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <div class="col-xl-3 col-12">
+            <section class="wrapper">
+                <div class="row">
+                    <div class="col mb-2">
+                        <h1 class="display-4 font-weight-bolder">Waiting Room</h1>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 mb-4">
+                        <ng-container *ngFor="let chatLobby of BZ98ChatLobbies; index as i;">
+                            <div class="card mb-3" *ngIf="chatLobby.users.length > 0">
+                                <div class="card-header">
+                                    Waiting in <span class="text-capitalize">{{chatLobby.metaData.name}}</span>
+                                </div>
+    
+                                <div class="list-group">
+                                    <ng-container *ngFor="let user of chatLobby.users; index as j;">
+                                        <div class="d-flex justify-content-start align-items-start">
+                                            <img class="rounded" [src]="user.steamImgUri" width="64" height="64">
+                                            <h5 class="ms-2 mt-1">{{user.name}}</h5>
+                                            <a title="Steam Profile" *ngIf="user.isSteam" class="m-1 text-decoration-none btn btn-sm btn-primary text-bg-primary border border-primary" style="--bs-bg-opacity:.3;--bs-border-opacity:.3;" href="https://steamcommunity.com/profiles/{{user.steamCleanId}}/" target="_blank">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-steam" viewBox="0 0 16 16" style="margin-bottom:3px;">
+                                                    <path d="M.329 10.333A8.01 8.01 0 0 0 7.99 16C12.414 16 16 12.418 16 8s-3.586-8-8.009-8A8.006 8.006 0 0 0 0 7.468l.003.006 4.304 1.769A2.2 2.2 0 0 1 5.62 8.88l1.96-2.844-.001-.04a3.046 3.046 0 0 1 3.042-3.043 3.046 3.046 0 0 1 3.042 3.043 3.047 3.047 0 0 1-3.111 3.044l-2.804 2a2.223 2.223 0 0 1-3.075 2.11 2.22 2.22 0 0 1-1.312-1.568L.33 10.333Z"/>
+                                                    <path d="M4.868 12.683a1.715 1.715 0 0 0 1.318-3.165 1.7 1.7 0 0 0-1.263-.02l1.023.424a1.261 1.261 0 1 1-.97 2.33l-.99-.41a1.7 1.7 0 0 0 .882.84Zm3.726-6.687a2.03 2.03 0 0 0 2.027 2.029 2.03 2.03 0 0 0 2.027-2.029 2.03 2.03 0 0 0-2.027-2.027 2.03 2.03 0 0 0-2.027 2.027m2.03-1.527a1.524 1.524 0 1 1-.002 3.048 1.524 1.524 0 0 1 .002-3.048"/>
+                                                </svg> 
+                                            </a>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </ng-container>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>

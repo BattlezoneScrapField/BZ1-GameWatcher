@@ -1,0 +1,9 @@
+﻿@BZAPI_HostAddress = https://localhost:7235
+
+GET {{BZAPI_HostAddress}}/api/bz98lobby
+
+###
+
+GET {{BZAPI_HostAddress}}/api/bz98lobby
+
+###
