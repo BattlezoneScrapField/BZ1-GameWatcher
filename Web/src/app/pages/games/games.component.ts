@@ -1,31 +1,28 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faUser, faComputer, faMessage, faPlayCircle, faLock, faLockOpen, faCirclePlay, faLink } from '@fortawesome/free-solid-svg-icons';
-import { faDiscord, faYoutube } from '@fortawesome/free-brands-svg-icons';
-import { Subscription } from 'rxjs';
-import { RouterOutlet } from '@angular/router';
-import { BZ98Lobby } from '../../models/bz98-lobby-info';
+import { faCirclePlay, faComputer, faLink, faLock, faLockOpen, faMessage, faPlayCircle, faUser } from '@fortawesome/free-solid-svg-icons';
+import { EMPTY, Subject, catchError, exhaustMap, takeUntil, timer } from 'rxjs';
+import { environment } from '../../../environments/environment';
+import { SiteNavComponent } from '../../components/site-nav/site-nav.component';
+import { BZ98Lobby, BZ98LobbyData, BZ98LobbyView, BZ98User } from '../../models/bz98-lobby-info';
 import { BZ98Service } from '../../services/bz98.service';
+import { buildSteamJoinUrl } from '../../services/steam-join';
+
+/** Number of '*'-separated fields a game settings string must have to be parsable. */
+const GAME_SETTINGS_FIELD_COUNT = 9;
 
 @Component({
     selector: 'app-games',
     standalone: true,
-    imports: [CommonModule, FontAwesomeModule, RouterOutlet],
+    imports: [CommonModule, FontAwesomeModule, SiteNavComponent],
     templateUrl: './games.component.html',
     styleUrl: './games.component.scss'
 })
 export class GamesComponent implements OnInit, OnDestroy {
-    title = 'BZ1 Game Watcher';
-
-    // Core variable. If this exists, don't call the API.
-    lobbyId: string;
-
-    refreshInterval;
+    private readonly destroyed = new Subject<void>();
 
     faLink = faLink;
-    faYouTube = faYoutube;
-    faDiscord = faDiscord;
     faUser = faUser;
     faComputer = faComputer;
     faMessage = faMessage;
@@ -34,59 +31,111 @@ export class GamesComponent implements OnInit, OnDestroy {
     faLockOpen = faLockOpen;
     faCirclePlay = faCirclePlay;
 
-    BZ98Lobbies: BZ98Lobby[];
-    BZ98ChatLobbies: BZ98Lobby[];
-    BZ98MaxPlayerSlots: number = 15;
+    BZ98Lobbies: BZ98LobbyView[] = [];
+    BZ98ChatLobbies: BZ98LobbyView[] = [];
 
-    BZ98GetLobbiesSubscription: Subscription;
+    /** True once a response has been received, so the page can tell "empty" from "still loading". */
+    hasLoaded = false;
 
-    constructor(private bz98Service: BZ98Service) {
+    /** Set when the most recent refresh failed, so the page can say so instead of going blank. */
+    loadFailed = false;
 
+    constructor(private readonly bz98Service: BZ98Service) {
     }
 
     ngOnInit(): void {
-        this.getLobbyData();
-        this.refreshInterval = setInterval(() => { this.getLobbyData(); }, 3000);
+        // exhaustMap rather than a bare setInterval: if a refresh is slow, later ticks are skipped
+        // instead of stacking up more in-flight requests.
+        timer(0, environment.lobbyRefreshIntervalMs)
+            .pipe(
+                exhaustMap(() => this.bz98Service.getBZ98Lobbies().pipe(
+                    catchError((error: unknown) => {
+                        // Without this the polling subscription died on the first failed request
+                        // and the page silently stopped updating for good.
+                        console.error('Failed to refresh lobby data.', error);
+                        this.loadFailed = true;
+                        this.hasLoaded = true;
+                        return EMPTY;
+                    })
+                )),
+                takeUntil(this.destroyed)
+            )
+            .subscribe(lobbies => this.applyLobbies(lobbies));
     }
 
     ngOnDestroy(): void {
-        if (this.BZ98GetLobbiesSubscription) this.BZ98GetLobbiesSubscription.unsubscribe();
-        if (this.refreshInterval) clearInterval(this.refreshInterval);
+        this.destroyed.next();
+        this.destroyed.complete();
     }
 
-    getLobbyData() {
-        console.log("Refreshing Lobby Data...");
+    joinGame(lobby: BZ98LobbyView): void {
+        window.location.href = buildSteamJoinUrl(lobby.id);
+    }
 
-        this.bz98Service.getBZ98Lobbies().subscribe({
-            next: (data) => {
-                // Make sure the users are formatted to an array as well.
-                for (let i = 0; i < data.length; i++) {
-                    const lobby = data[i];
-                    lobby.users = this.toArray(lobby.users);
+    async shareToDiscord(lobby: BZ98LobbyView): Promise<void> {
+        const shareText =
+            `${lobby.userCount}/${lobby.memberLimit} ${window.location.origin}/join/${lobby.id} @BZ1 Expert @BZ1 Novice`;
 
-                    // Split the users into teams based on their team number.
-                    lobby.oddTeamUsers = lobby.users.filter(u => u.metaData.team % 2);
-                    lobby.evenTeamUsers = lobby.users.filter(u => !(u.metaData.team % 2))
-                }
+        await this.copyToClipboard(shareText);
 
-                this.BZ98ChatLobbies = data.filter(l => l.isChat);
-                this.BZ98Lobbies = data.filter(l => l.isChat === false);
+        window.location.href = environment.discordShareChannelUrl;
+    }
 
-                this.BZ98Lobbies.forEach((game) => {
-                    if (game.metaData.gameSettings) {
-                        game.stats = this.parseGameSettings(game.metaData.gameSettings);
-                    }
-                });
+    private applyLobbies(lobbies: BZ98Lobby[]): void {
+        this.hasLoaded = true;
+        this.loadFailed = false;
+
+        // The API always returns an array, but a proxy error page or an older API could still
+        // deliver something else; treat anything unexpected as "no lobbies" rather than throwing.
+        const source = Array.isArray(lobbies) ? lobbies : [];
+        const views = source.map(lobby => this.toView(lobby));
+
+        this.BZ98ChatLobbies = views.filter(lobby => lobby.isChat);
+        this.BZ98Lobbies = views.filter(lobby => !lobby.isChat);
+    }
+
+    private toView(lobby: BZ98Lobby): BZ98LobbyView {
+        const users = lobby.users ? Object.values(lobby.users) : [];
+        const oddTeamUsers: BZ98User[] = [];
+        const evenTeamUsers: BZ98User[] = [];
+
+        for (const user of users) {
+            const team = Number(user.metaData?.team);
+
+            // A user whose team has not been reported yet shows in the right-hand column, which is
+            // where the previous `!(undefined % 2)` check put them.
+            if (Number.isFinite(team) && team % 2 !== 0) {
+                oddTeamUsers.push(user);
+            } else {
+                evenTeamUsers.push(user);
             }
-        })
+        }
+
+        const parsedStats = lobby.isChat ? null : this.parseGameSettings(lobby.metaData?.gameSettings);
+
+        return {
+            ...lobby,
+            users,
+            oddTeamUsers,
+            evenTeamUsers,
+            stats: parsedStats ?? lobby.stats
+        };
     }
 
-    toArray(data) {
-        return Object.keys(data).map(key => data[key]);
-    }
+    /**
+     * Game settings arrive as a '*'-separated string. Returns null when the string is missing or
+     * too short rather than producing an object full of undefined fields.
+     */
+    private parseGameSettings(settings: string | null | undefined): BZ98LobbyData | null {
+        if (!settings) {
+            return null;
+        }
 
-    parseGameSettings(settings: string) {
         const parts = settings.split('*');
+
+        if (parts.length < GAME_SETTINGS_FIELD_COUNT) {
+            return null;
+        }
 
         return {
             mapFile: parts[1],
@@ -97,20 +146,35 @@ export class GamesComponent implements OnInit, OnDestroy {
                 satellite: Boolean(Number(parts[4])),
                 barracks: Boolean(Number(parts[5])),
                 sniper: Boolean(Number(parts[6])),
-                splinter: Boolean(Number(parts[7])),
-            },
+                splinter: Boolean(Number(parts[7]))
+            }
         };
     }
 
-    shareToDiscord(button: HTMLButtonElement, lobby: BZ98Lobby) {
-        // Thanks to Sev for this solution.
-        let textArea = button.querySelector('textarea');
-        textArea.textContent = `${lobby.userCount}/${lobby.memberLimit} https://${window.location.host}/join/${lobby.id} @BZ1 Expert @BZ1 Novice`
-        textArea.focus();
+    private async copyToClipboard(text: string): Promise<void> {
+        try {
+            await navigator.clipboard.writeText(text);
+            return;
+        } catch {
+            // The Clipboard API needs a secure context and permission; fall back to the old
+            // hidden-textarea trick when it is unavailable.
+        }
+
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.setAttribute('readonly', '');
+        textArea.style.position = 'absolute';
+        textArea.style.left = '-9999px';
+
+        document.body.appendChild(textArea);
         textArea.select();
 
-        document.execCommand('copy');
-
-        window.location.replace('discord:///channels/1046303222165418078/1102709555391103127');
+        try {
+            document.execCommand('copy');
+        } catch (error) {
+            console.error('Unable to copy the share link to the clipboard.', error);
+        } finally {
+            document.body.removeChild(textArea);
+        }
     }
 }

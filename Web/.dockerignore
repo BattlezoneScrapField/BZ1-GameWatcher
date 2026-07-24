@@ -1,7 +1,8 @@
 /node_modules
 /build
+/dist
 /.vscode
 /.git
-/.dist
+/.angular
 Dockerfile
 *.md

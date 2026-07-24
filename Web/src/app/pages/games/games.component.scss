@@ -31,7 +31,8 @@
     border-left-color: inherit;
 }
 
-.card-custom-avatar img {
+.card-custom-avatar img,
+.card-custom-avatar .avatar-fallback {
     border-radius: 50%;
     box-shadow: 0 0 15px rgba(10, 10, 10, 0.3);
     position: absolute;
@@ -39,6 +40,27 @@
     left: 1.25rem;
     width: 100px;
     height: 100px;
+}
+
+// Shown instead of a broken image for GOG players and any Steam lookup that failed.
+.avatar-fallback {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #2b2b2b;
+    color: #8c8c8c;
+    flex-shrink: 0;
+}
+
+.avatar-fallback-sm {
+    width: 40px;
+    height: 40px;
+}
+
+.avatar-fallback-lg {
+    width: 64px;
+    height: 64px;
+    font-size: 28px;
 }
 
 .custom-pill {
