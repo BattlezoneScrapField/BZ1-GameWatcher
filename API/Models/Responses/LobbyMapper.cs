@@ -1,0 +1,88 @@
+namespace BZAPI.Models.Responses
+{
+    /// <summary>
+    /// Projects internal wire models onto the public API contract.
+    /// </summary>
+    public static class LobbyMapper
+    {
+        public static LobbyResponse ToResponse(this BZ98Lobby lobby) => new()
+        {
+            Id = lobby.Id,
+            ClientVersion = lobby.ClientVersion,
+            CreatedTime = lobby.CreatedTime,
+            IsChat = lobby.IsChat,
+            IsLocked = lobby.IsLocked,
+            IsPrivate = lobby.IsPrivate,
+            MemberLimit = lobby.MemberLimit,
+            Owner = lobby.Owner,
+            UserCount = lobby.UserCount,
+            DirectJoinUrl = lobby.DirectJoinUrl,
+            Host = lobby.Host?.ToResponse(),
+            MetaData = lobby.MetaData?.ToResponse(),
+            Stats = lobby.Stats?.ToResponse(),
+            Users = lobby.Users?
+                .Where(pair => pair.Value is not null)
+                .ToDictionary(pair => pair.Key, pair => pair.Value.ToResponse()) ?? []
+        };
+
+        public static UserResponse ToResponse(this BZ98User user) => new()
+        {
+            AuthType = user.AuthType,
+            ClientVersion = user.ClientVersion,
+            Id = user.Id,
+            IsAdmin = user.IsAdmin,
+            IsAuth = user.IsAuth,
+            IsBB = user.IsBB,
+            IsDangerous = user.IsDangerous,
+            IsInLounge = user.IsInLounge,
+            IsGOG = user.IsGOG,
+            IsTest = user.IsTest,
+            IsSteam = user.IsSteam,
+            Lobby = user.Lobby,
+            Name = user.Name,
+            MetaData = user.MetaData?.ToResponse(),
+            Stats = user.Stats?.ToResponse(),
+            SteamImgUri = user.SteamImgUri,
+            SteamCleanId = user.SteamCleanId
+        };
+
+        private static LobbyMetaDataResponse ToResponse(this BZ98MetaData metaData) => new()
+        {
+            GameVersion = metaData.GameVersion,
+            GameSettings = metaData.GameSettings,
+            GameType = metaData.GameType,
+            Launched = metaData.Launched,
+            Name = metaData.Name,
+            NextMid = metaData.NextMid,
+            UserCount = metaData.UserCount,
+            UserPack = metaData.UserPack
+        };
+
+        private static LobbyStatsResponse ToResponse(this BZ98LobbyData stats) => new()
+        {
+            MapFile = stats.MapFile,
+            CRC32 = stats.CRC32,
+            Mod = stats.Mod,
+            Attributes = stats.Attributes is null ? null : new LobbyStatsAttributesResponse
+            {
+                Lives = stats.Attributes.Lives,
+                Satellite = stats.Attributes.Satellite,
+                Barracks = stats.Attributes.Barracks,
+                Sniper = stats.Attributes.Sniper,
+                Splinter = stats.Attributes.Splinter
+            }
+        };
+
+        private static UserMetaDataResponse ToResponse(this BZ98UserMetaData metaData) => new()
+        {
+            ClientsConnected = metaData.ClientsConnected,
+            FriendId = metaData.FriendId,
+            KnownPlayers = metaData.KnownPlayers,
+            Launched = metaData.Launched,
+            MiniId = metaData.MiniId,
+            Ready = metaData.Ready,
+            Team = metaData.Team,
+            Vehicle = metaData.Vehicle
+        };
+    }
+}

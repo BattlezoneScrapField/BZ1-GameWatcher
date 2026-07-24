@@ -1,41 +1,47 @@
-export interface BZ98Lobby
-{
-    clientVersion: string;
+/**
+ * A lobby exactly as returned by the API.
+ *
+ * Player IP, WAN and LAN addresses are deliberately absent — the API no longer publishes them.
+ */
+export interface BZ98Lobby {
+    id: number;
+    clientVersion: string | null;
     createdTime: string;
-    id: string;
     isChat: boolean;
     isLocked: boolean;
     isPrivate: boolean;
-    host: BZ98User;
+    host: BZ98User | null;
     memberLimit: number;
-    metaData: BZ98MetaData;
-    stats: BZ98LobbyData;
-    owner: string;
+    metaData: BZ98MetaData | null;
+    stats: BZ98LobbyData | null;
+    owner: string | null;
     userCount: number;
+    users: Record<string, BZ98User>;
+    directJoinUrl: string | null;
+}
+
+/** A lobby prepared for display, with users flattened and split into team columns. */
+export interface BZ98LobbyView extends Omit<BZ98Lobby, 'users'> {
     users: BZ98User[];
     oddTeamUsers: BZ98User[];
     evenTeamUsers: BZ98User[];
-    directJoinUrl: string;
 }
 
-export interface BZ98MetaData
-{
-    gameVersion: string;
-    gameSettings: string;
-    gameType: string;
-    launched: boolean;
-    name: string;
-    nextMid: string;
-    userCount: string;
-    userPack: string;
+export interface BZ98MetaData {
+    gameVersion: string | null;
+    gameSettings: string | null;
+    gameType: string | null;
+    launched: string | null;
+    name: string | null;
+    nextMid: string | null;
+    userCount: string | null;
+    userPack: string | null;
 }
 
-export interface BZ98User
-{
-    authType: string;
-    clientVersion: string;
-    id: string;
-    ipAddress: string;
+export interface BZ98User {
+    authType: string | null;
+    clientVersion: string | null;
+    id: string | null;
     isAdmin: boolean;
     isAuth: boolean;
     isBB: boolean;
@@ -44,39 +50,34 @@ export interface BZ98User
     isGOG: boolean;
     isTest: boolean;
     isSteam: boolean;
-    lanAddresses: string[];
     lobby: number;
-    metaData: BZ98UserMetaData;
-    name: string;
-    stats: BZ98LobbyData;
-    steamCleanId: string;
-    steamImgUri: string;
-    wanAddress: string;
+    metaData: BZ98UserMetaData | null;
+    name: string | null;
+    stats: BZ98LobbyData | null;
+    steamCleanId: string | null;
+    steamImgUri: string | null;
 }
 
-export interface BZ98UserMetaData
-{
-    clientsconnected: string;
-    friendId: string;
-    knownPlayers: string;
-    launched: string;
-    miniid: string;
-    ready: string;
-    team: string;
-    vehicle: string;
+export interface BZ98UserMetaData {
+    clientsConnected: string | null;
+    friendId: string | null;
+    knownPlayers: string | null;
+    launched: string | null;
+    miniId: string | null;
+    ready: string | null;
+    team: string | null;
+    vehicle: string | null;
 }
 
-export interface BZ98LobbyData
-{
-    mapFile: string;
-    crc32: string;
-    mod: string;
-    attributes: BZ98LobbyDataAttributes;
+export interface BZ98LobbyData {
+    mapFile: string | null;
+    crc32: string | null;
+    mod: string | null;
+    attributes: BZ98LobbyDataAttributes | null;
 }
 
-export interface BZ98LobbyDataAttributes
-{
-    lives: string;
+export interface BZ98LobbyDataAttributes {
+    lives: string | null;
     satellite: boolean;
     barracks: boolean;
     sniper: boolean;

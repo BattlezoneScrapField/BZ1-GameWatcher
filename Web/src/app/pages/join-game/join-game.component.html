@@ -1,26 +1,13 @@
-<nav class="navbar navbar-expand-lg bg-dark">
-    <div class="container-fluid">
-        <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between w-100">
-            <a class="d-flex col-md-4 align-items-center mb-2 mb-lg-0 link-body-emphasis text-decoration-none">
-                <img src="favicon.ico" width="30" height="30"/>
-                <div class="ms-2">
-                    Battlezone 98 Redux Game List
-                </div>
-            </a>
+<app-site-nav></app-site-nav>
 
-            <ul class="nav nav-pills col-12 col-lg-auto mb-2 justify-content-center mb-md-0">
-                <li class="nav-item me-2">
-                    <a routerLink="games" class="nav-link bg-secondary active" href="/games">Games</a>
-                </li>
-                <!-- <li class="nav-item">
-                    <a routerLink="unit-database" class="nav-link px-2 text-secondary" href="/unit-database">Unit Database</a>
-                </li> -->
-            </ul>
-
-            <div class="col-md-3 text-end">
-                <a class="me-3 fs-4 text-white" href="https://www.youtube.com/@battlezonecommunity" target="_blank"><fa-icon [icon]="faYouTube"></fa-icon></a>
-                <a class="me-2 fs-4 text-white" href="https://discord.gg/battlezonestrategy"><fa-icon [icon]="faDiscord"></fa-icon></a>
-            </div>
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12 text-center">
+            <h1 class="display-6">Launching Battlezone 98 Redux&hellip;</h1>
+            <p class="text-secondary">
+                If nothing happens, make sure the game is installed and Steam is running.
+            </p>
+            <a class="btn btn-secondary" routerLink="/games">Back to the game list</a>
         </div>
     </div>
-</nav>
+</div>

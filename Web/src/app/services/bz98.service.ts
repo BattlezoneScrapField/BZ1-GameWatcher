@@ -1,17 +1,17 @@
-import { Injectable } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
-import { Observable } from "rxjs";
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { BZ98Lobby } from '../models/bz98-lobby-info';
 
 @Injectable({
     providedIn: 'root'
 })
 export class BZ98Service {
-    constructor(private _httpClient: HttpClient) {
-
+    constructor(private readonly httpClient: HttpClient) {
     }
-    
-    getBZ98Lobbies() : Observable<any> {
-        return this._httpClient.get(environment.apiUrl + 'BZ98Lobby');
+
+    getBZ98Lobbies(): Observable<BZ98Lobby[]> {
+        return this.httpClient.get<BZ98Lobby[]>(`${environment.apiUrl}BZ98Lobby`);
     }
 }
