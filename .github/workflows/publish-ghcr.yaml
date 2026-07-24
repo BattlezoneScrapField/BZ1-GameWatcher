@@ -8,16 +8,16 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  API_IMAGE: ghcr.io/jj173/battlezone-api-ghcr
-  WEB_IMAGE: ghcr.io/jj173/battlezone-web-ghcr
+  API_NAME: battlezone-api-ghcr
+  WEB_NAME: battlezone-web-ghcr
 
 jobs:
   build_api:
     name: Build API
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '8.0.x'
       - name: Restore
@@ -29,8 +29,8 @@ jobs:
     name: Build and test web
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: '22'
           cache: npm
@@ -56,9 +56,19 @@ jobs:
       contents: read
       packages: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: docker/setup-buildx-action@v3
+
+      # Images must live under this repository's own owner: GITHUB_TOKEN can only write
+      # packages in its own namespace, and pushing to a hard-coded upstream owner 403s on
+      # a fork. GHCR also rejects uppercase paths, so the owner is lowercased here.
+      - name: Resolve image names
+        id: images
+        run: |
+          owner="${GITHUB_REPOSITORY_OWNER,,}"
+          echo "api=${REGISTRY}/${owner}/${API_NAME}" >> "$GITHUB_OUTPUT"
+          echo "web=${REGISTRY}/${owner}/${WEB_NAME}" >> "$GITHUB_OUTPUT"
 
       - name: Log in to GHCR
         uses: docker/login-action@v3
@@ -74,8 +84,8 @@ jobs:
           push: true
           # Tagging by commit SHA as well as latest makes a rollback possible.
           tags: |
-            ${{ env.API_IMAGE }}:latest
-            ${{ env.API_IMAGE }}:${{ github.sha }}
+            ${{ steps.images.outputs.api }}:latest
+            ${{ steps.images.outputs.api }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -85,7 +95,7 @@ jobs:
           context: ./Web
           push: true
           tags: |
-            ${{ env.WEB_IMAGE }}:latest
-            ${{ env.WEB_IMAGE }}:${{ github.sha }}
+            ${{ steps.images.outputs.web }}:latest
+            ${{ steps.images.outputs.web }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

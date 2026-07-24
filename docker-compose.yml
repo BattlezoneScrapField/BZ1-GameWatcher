@@ -3,7 +3,7 @@ name: BZ1GameWatcher
 services:
   gamewatcher-frontend:
     container_name: BZ1GameWatcherUI
-    image: "ghcr.io/jj173/battlezone-web-ghcr:latest"
+    image: "ghcr.io/${GHCR_OWNER:-battlezonescrapfield}/battlezone-web-ghcr:latest"
     build: ./Web
     ports:
       - "80:80"
@@ -24,7 +24,7 @@ services:
 
   gamewatcher-backend:
     container_name: BZAPI
-    image: "ghcr.io/jj173/battlezone-api-ghcr:latest"
+    image: "ghcr.io/${GHCR_OWNER:-battlezonescrapfield}/battlezone-api-ghcr:latest"
     build: ./API
     networks:
       - app-network
