@@ -1,0 +1,23 @@
+name: Docker Images for GHCR
+
+on: 
+  push
+
+jobs:
+  build_and_publish:
+    runs-on: ubuntu-latest
+    steps: 
+      - uses: actions/checkout@v3
+      - name: Login to Docker
+        run: | 
+          docker login --username jj173 --password ${{ secrets.GH_PAT }} ghcr.io
+      - name: Build and Push API
+        run: |
+          cd API
+          docker build . --tag ghcr.io/jj173/battlezone-api-ghcr:latest
+          docker push ghcr.io/jj173/battlezone-api-ghcr:latest
+      - name : Build and Push Web
+        run : |
+          cd Web
+          docker build . --tag ghcr.io/jj173/battlezone-web-ghcr:latest
+          docker push ghcr.io/jj173/battlezone-web-ghcr:latest
