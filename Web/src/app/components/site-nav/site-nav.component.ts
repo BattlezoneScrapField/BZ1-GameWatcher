@@ -10,7 +10,6 @@ import { environment } from '../../../environments/environment';
  */
 @Component({
     selector: 'app-site-nav',
-    standalone: true,
     imports: [FontAwesomeModule, RouterLink, RouterLinkActive],
     templateUrl: './site-nav.component.html'
 })

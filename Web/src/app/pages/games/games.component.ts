@@ -14,7 +14,6 @@ const GAME_SETTINGS_FIELD_COUNT = 9;
 
 @Component({
     selector: 'app-games',
-    standalone: true,
     imports: [CommonModule, FontAwesomeModule, SiteNavComponent],
     templateUrl: './games.component.html',
     styleUrl: './games.component.scss'

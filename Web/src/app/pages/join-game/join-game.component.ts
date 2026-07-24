@@ -9,7 +9,6 @@ const REDIRECT_DELAY_MS = 2000;
 
 @Component({
     selector: 'app-join-game',
-    standalone: true,
     imports: [CommonModule, RouterLink, SiteNavComponent],
     templateUrl: './join-game.component.html',
     styleUrl: './join-game.component.scss'
