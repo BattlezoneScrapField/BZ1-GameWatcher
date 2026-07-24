@@ -1,1 +1,22 @@
+# IDE
 .vs/*
+.vscode/*
+.idea/
+
+# .NET build output
+[Bb]in/
+[Oo]bj/
+
+# Node / Angular build output
+node_modules/
+dist/
+.angular/
+coverage/
+
+# Local configuration and secrets
+.env
+*.local.json
+appsettings.Local.json
+
+# Let's Encrypt state produced by docker compose
+certbot/
